@@ -377,6 +377,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
        
         case IDM_SETTINGS_AUTO_MAINTENANCE:
             // — Автоматичне обслуговування —
+            if (hListView_ProcessMonitor){
+       
             ShowWindow(hStatic_AutoMaintTitle, SW_SHOW);
             ShowWindow(hRadio_Daily, SW_SHOW);
             ShowWindow(hRadio_Weekly, SW_SHOW);
@@ -385,6 +387,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             ShowWindow(hCheck_Browser, SW_SHOW);
             ShowWindow(hCheck_Recycle, SW_SHOW);
             ShowWindow(hButton_SaveSettings, SW_SHOW);
+            }
             UpdateMenuText(hwnd, IDM_SETTINGS_AUTO_MAINTENANCE);
             break;
 
