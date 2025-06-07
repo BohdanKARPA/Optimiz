@@ -1,10 +1,8 @@
-#ifndef AUTOMAIN_H
-#define AUTOMAIN_H
+#ifndef AUTOMAINTENANCE_H
+#define AUTOMAINTENANCE_H
 
 #include <windows.h>
 #define IDT_AUTO_MAINTENANCE 1001
-
-#include "AutoMaintenance.h"  // якщо ще не підключено
 
 // ID-шки контролів
 #define IDC_AM_RADIO_STARTUP   2001
@@ -41,4 +39,4 @@ void ShowAutoMaintSettingsWindow(HWND hParent);
 // Функція, яка реально виконує очищення
 void PerformAutoMaintenance();
 
-#endif // AUTOMAIN_H
+#endif // AUTOMAINTENANCE_H

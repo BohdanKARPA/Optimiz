@@ -29,15 +29,17 @@
 #define IDC_DISKCLEANUP_DISKFREE_SIZE     2012
 
  // Ідентифікатори контролів для вкладки «Автоматичне обслуговування»
-#define IDC_AUTO_MAINT_TITLE              3001
-#define IDC_AUTO_MAINT_DAILY              3002
-#define IDC_AUTO_MAINT_WEEKLY             3003
-#define IDC_AUTO_MAINT_ONSTART            3004
-#define IDC_AUTO_MAINT_CHECK_TEMP         3005
-#define IDC_AUTO_MAINT_CHECK_BROWSER      3006
-#define IDC_AUTO_MAINT_CHECK_RECYCLE      3007
-#define IDC_AUTO_MAINT_SAVE               3008
-#define IDM_SETTINGS_AUTOMAINT            3009
+#define IDC_AUTO_MAINT_TITLE        3001
+#define IDC_AUTO_MAINT_DAILY        3002
+#define IDC_AUTO_MAINT_WEEKLY       3003
+#define IDC_AUTO_MAINT_ONSTART      3004
+#define IDC_AUTO_MAINT_CHECK_TEMP   3005
+#define IDC_AUTO_MAINT_CHECK_BROWSER 3006
+#define IDC_AUTO_MAINT_CHECK_RECYCLE 3007
+#define IDC_AUTO_MAINT_SAVE         3008
+#define IDC_AUTO_MAINT_EDIT_INTERVAL 3009
+
+#define IDM_SETTINGS_AUTOMAINT            3010
 // Ідентифікатор таймера для оновлення моніторингу
 #define IDT_MONITOR_REFRESH               5001
 #define IDT_AUTOMAINT_TIMER               5002

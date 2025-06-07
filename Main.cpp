@@ -178,6 +178,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     ShowWindow(hwnd, nCmdShow);
     UpdateWindow(hwnd);
 
+    SetupAutoMaintenance(hwnd);
     // Відразу показати “Моніторинг ресурсів” і поставити ▶ перед ним
     SendMessage(hwnd, WM_COMMAND, MAKELONG(IDM_MONITORING, 0), 0);
 
@@ -421,6 +422,18 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             BOOL brw = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_CHECK_BROWSER);
             BOOL rec = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_CHECK_RECYCLE);
             // TODO: зберегти у файл/реєстр/налаштування
+               // зберегти та запустити/перезапустити таймер
+            AutoMaintenanceSettings s;
+            s.scheduleType = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_ONSTART)
+                ? SCHEDULE_ON_STARTUP
+                : SCHEDULE_INTERVAL;
+            if (s.scheduleType == SCHEDULE_INTERVAL) {
+                BOOL ok;
+                int val = GetDlgItemInt(hwnd, IDC_AUTO_MAINT_EDIT_INTERVAL, &ok, FALSE);
+                s.intervalMinutes = ok && val > 0 ? val : 60;
+            }
+            SaveAutoMaintenanceSettings(s);
+            SetupAutoMaintenance(hwnd);
             MessageBox(hwnd, L"Налаштування збережено.", L"Автоматичне обслуговування", MB_OK | MB_ICONINFORMATION);
         } break;
         case IDM_SETTINGS_AUTOMAINT:
@@ -438,6 +451,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             if (hListView_ProcessMonitor && IsWindowVisible(hListView_ProcessMonitor)) {
                 PopulateProcessList(hListView_ProcessMonitor);
             }
+        }
+        else if (wParam == IDT_AUTO_MAINTENANCE) {
+            PerformAutoMaintenance();
         }
         break;
 
