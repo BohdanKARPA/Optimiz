@@ -42,7 +42,5 @@
 #define IDT_MONITOR_REFRESH               5001
 #define IDT_AUTOMAINT_TIMER               5002
 
-#
-
 #endif // RESOURCE_DEFINITIONS_H
 
