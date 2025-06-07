@@ -17,6 +17,7 @@
 static HMENU        hMenuBar_global = NULL;    // Дескриптор головного меню
 static UINT         activeMenuID_global = 0;       // Який пункт зараз активний
 // (Шрифти для Owner-Draw тут не використовуються, бо ми малюємо просто текст із ▶)
+static HWND hMainWnd = NULL;
 
 // Оригінальні назви пунктів меню
 static const wchar_t* MENU_TEXT_MONITOR = L"Моніторинг ресурсів";
@@ -422,6 +423,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             // TODO: зберегти у файл/реєстр/налаштування
             MessageBox(hwnd, L"Налаштування збережено.", L"Автоматичне обслуговування", MB_OK | MB_ICONINFORMATION);
         } break;
+        case IDM_SETTINGS_AUTOMAINT:
+            // викликаємо наше вікно налаштувань
+            ShowAutoMaintSettingsWindow(hMainWnd);
+            break;
 
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);

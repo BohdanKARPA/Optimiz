@@ -37,7 +37,7 @@
 #define IDC_AUTO_MAINT_CHECK_BROWSER      3006
 #define IDC_AUTO_MAINT_CHECK_RECYCLE      3007
 #define IDC_AUTO_MAINT_SAVE               3008
-
+#define IDM_SETTINGS_AUTOMAINT            3009
 // Ідентифікатор таймера для оновлення моніторингу
 #define IDT_MONITOR_REFRESH               5001
 #define IDT_AUTOMAINT_TIMER               5002
