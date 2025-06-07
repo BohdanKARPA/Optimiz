@@ -1,4 +1,4 @@
-//AutoMaintenance.h
+// AutoMaintenance.h
 
 #ifndef AUTOMAINTENANCE_H
 #define AUTOMAINTENANCE_H
@@ -16,29 +16,35 @@
 // Ім’я класу для вікна налаштувань
 static const wchar_t* AUTO_MAINT_SETTINGS_CLASS = L"AutoMaintSettingsClass";
 
-// Створює всі контролери вкладки «Автоматичне обслуговування»
-void CreateAutoMaintenanceControls(HWND hWndParent);
-
 // Типи планування
 enum ScheduleType {
     SCHEDULE_ON_STARTUP,
     SCHEDULE_INTERVAL
 };
 
+// Оновлена структура налаштувань
 struct AutoMaintenanceSettings {
     ScheduleType scheduleType;   // який режим обрано
     int intervalMinutes;         // інтервал у хвилинах, якщо SCHEDULE_INTERVAL
+
+    // Додано: які категорії очищати
+    bool cleanTempFiles;         // Тимчасові файли (системні + користувача)
+    bool cleanBrowserCache;      // Кеш браузерів (Chrome, Firefox, Edge)
+    bool cleanRecycleBin;        // Кошик
 };
 
 // Завантажує налаштування з реєстру (або файлу)
 bool LoadAutoMaintenanceSettings(AutoMaintenanceSettings& settings);
+
 // Зберігає налаштування
 bool SaveAutoMaintenanceSettings(const AutoMaintenanceSettings& settings);
+
 // Налаштовує таймер/запуск за цими налаштуваннями
 void SetupAutoMaintenance(HWND hWnd);
-// Функція, що показує вікно налаштувань
-void ShowAutoMaintSettingsWindow(HWND hParent);
+
 // Функція, яка реально виконує очищення
 void PerformAutoMaintenance();
+
+void CreateAutoMaintenanceControls(HWND hWndParent);
 
 #endif // AUTOMAINTENANCE_H

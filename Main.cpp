@@ -262,9 +262,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
         break;
 
-        // ============================
-       // Оновлено: Додаємо обробку двойного кліку по автозавантаженню
-       // ============================
     case WM_NOTIFY: {
         LPNMHDR pnmhdr = (LPNMHDR)lParam;
 
@@ -289,300 +286,321 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
     case WM_COMMAND: {
         int wmId = LOWORD(wParam);
-
-        // Спершу ховаємо всі вкладки, щоби не було накладання
-        switch (wmId) {
-        case IDM_MONITORING:
-        case IDM_DISK_CLEANUP:
-        case IDM_SETTINGS_AUTO_MAINTENANCE:
-            // — Моніторинг —
-            if (hListView_ProcessMonitor)    ShowWindow(hListView_ProcessMonitor, SW_HIDE);
-            if (hStatic_CPUOverall)          ShowWindow(hStatic_CPUOverall, SW_HIDE);
-            if (hStatic_MemoryOverall)       ShowWindow(hStatic_MemoryOverall, SW_HIDE);
-            if (hStatic_IOReadOverall)       ShowWindow(hStatic_IOReadOverall, SW_HIDE);
-            if (hStatic_IOWriteOverall)      ShowWindow(hStatic_IOWriteOverall, SW_HIDE);
-            if (hStatic_DiskUsageOverall)    ShowWindow(hStatic_DiskUsageOverall, SW_HIDE);
-
-            // — Очищення диска —
-            if (hListView_DiskCleanup)       ShowWindow(hListView_DiskCleanup, SW_HIDE);
-            if (hButton_AnalyzeDisk)         ShowWindow(hButton_AnalyzeDisk, SW_HIDE);
-            if (hButton_CleanSelected)       ShowWindow(hButton_CleanSelected, SW_HIDE);
-            if (hButton_CleanAll)            ShowWindow(hButton_CleanAll, SW_HIDE);
-            if (hStatic_TotalJunkLabel)      ShowWindow(hStatic_TotalJunkLabel, SW_HIDE);
-            if (hStatic_TotalJunkSize)       ShowWindow(hStatic_TotalJunkSize, SW_HIDE);
-            if (hStatic_DiskTotalLabel)      ShowWindow(hStatic_DiskTotalLabel, SW_HIDE);
-            if (hStatic_DiskTotalSize)       ShowWindow(hStatic_DiskTotalSize, SW_HIDE);
-            if (hStatic_DiskUsedLabel)       ShowWindow(hStatic_DiskUsedLabel, SW_HIDE);
-            if (hStatic_DiskUsedSize)        ShowWindow(hStatic_DiskUsedSize, SW_HIDE);
-            if (hStatic_DiskFreeLabel)       ShowWindow(hStatic_DiskFreeLabel, SW_HIDE);
-            if (hStatic_DiskFreeSize)        ShowWindow(hStatic_DiskFreeSize, SW_HIDE);
-
-            if (hStatic_AutoMaintTitle) ShowWindow(hStatic_AutoMaintTitle, SW_HIDE);
-            if (hRadio_Daily) ShowWindow(hRadio_Daily, SW_HIDE);
-            if (hRadio_Weekly) ShowWindow(hRadio_Weekly, SW_HIDE);
-            if (hRadio_OnStart)ShowWindow(hRadio_OnStart, SW_HIDE);
-            if (hCheck_Temp)ShowWindow(hCheck_Temp, SW_HIDE);
-            if (hCheck_Browser)ShowWindow(hCheck_Browser, SW_HIDE);
-            if (hCheck_Recycle) ShowWindow(hCheck_Recycle, SW_HIDE);
-            if (hButton_SaveSettings)ShowWindow(hButton_SaveSettings, SW_HIDE);
-
-            // Зупиняємо таймер моніторингу (якщо він був)
+           
+        if (wmId == IDM_MONITORING || wmId == IDM_DISK_CLEANUP || wmId == IDM_SETTINGS_AUTO_MAINTENANCE) {
+            ShowWindow(hListView_ProcessMonitor, SW_HIDE);
+            ShowWindow(hListView_DiskCleanup, SW_HIDE);
+            ShowWindow(hButton_AnalyzeDisk, SW_HIDE);
+            ShowWindow(hButton_CleanSelected, SW_HIDE);
+            ShowWindow(hButton_CleanAll, SW_HIDE);
+            ShowWindow(hStatic_TotalJunkLabel, SW_HIDE);
+            ShowWindow(hStatic_TotalJunkSize, SW_HIDE);
+            ShowWindow(hStatic_DiskTotalLabel, SW_HIDE);
+            ShowWindow(hStatic_DiskTotalSize, SW_HIDE);
+            ShowWindow(hStatic_DiskUsedLabel, SW_HIDE);
+            ShowWindow(hStatic_DiskUsedSize, SW_HIDE);
+            ShowWindow(hStatic_DiskFreeLabel, SW_HIDE);
+            ShowWindow(hStatic_DiskFreeSize, SW_HIDE);
+            ShowWindow(hStatic_AutoMaintTitle, SW_HIDE);
+            ShowWindow(hRadio_Daily, SW_HIDE);
+            ShowWindow(hRadio_Weekly, SW_HIDE);
+            ShowWindow(hRadio_OnStart, SW_HIDE);
+            ShowWindow(hCheck_Temp, SW_HIDE);
+            ShowWindow(hCheck_Browser, SW_HIDE);
+            ShowWindow(hCheck_Recycle, SW_HIDE);
+            ShowWindow(hButton_SaveSettings, SW_HIDE);
             KillTimer(hwnd, IDT_MONITOR_REFRESH);
-            break;
         }
 
-        // Далі обробляємо самі команди
-        switch (wmId) {
-        case IDM_FILE_EXIT:
-            DestroyWindow(hwnd);
-            break;
+                // Тепер показуємо потрібне
+                switch (wmId) {
+                case IDM_MONITORING:
+                    SetTimer(hwnd, IDT_MONITOR_REFRESH, 1000, NULL);
+                    PopulateProcessList(hListView_ProcessMonitor);
+                    ShowWindow(hListView_ProcessMonitor, SW_SHOW);
+                    SetFocus(hListView_ProcessMonitor);
+                    break;
 
-        case IDM_MONITORING:
-            // — показуємо вкладку "Моніторинг ресурсів" —
-            if (hListView_ProcessMonitor) {
-                SetTimer(hwnd, IDT_MONITOR_REFRESH, 1000, NULL);
-                PopulateProcessList(hListView_ProcessMonitor);
-                ShowWindow(hStatic_CPUOverall, SW_SHOW);
-                ShowWindow(hStatic_MemoryOverall, SW_SHOW);
-                ShowWindow(hStatic_IOReadOverall, SW_SHOW);
-                ShowWindow(hStatic_IOWriteOverall, SW_SHOW);
-                ShowWindow(hStatic_DiskUsageOverall, SW_SHOW);
-                ShowWindow(hListView_ProcessMonitor, SW_SHOW);
-                SetFocus(hListView_ProcessMonitor);
+                case IDM_DISK_CLEANUP:
+                    ListView_DeleteAllItems(hListView_DiskCleanup);
+                    ShowWindow(hListView_DiskCleanup, SW_SHOW);
+                    ShowWindow(hButton_AnalyzeDisk, SW_SHOW);
+                    ShowWindow(hButton_CleanSelected, SW_SHOW);
+                    ShowWindow(hButton_CleanAll, SW_SHOW);
+                    ShowWindow(hStatic_TotalJunkLabel, SW_SHOW);
+                    ShowWindow(hStatic_TotalJunkSize, SW_SHOW);
+                    ShowWindow(hStatic_DiskTotalLabel, SW_SHOW);
+                    ShowWindow(hStatic_DiskTotalSize, SW_SHOW);
+                    ShowWindow(hStatic_DiskUsedLabel, SW_SHOW);
+                    ShowWindow(hStatic_DiskUsedSize, SW_SHOW);
+                    ShowWindow(hStatic_DiskFreeLabel, SW_SHOW);
+                    ShowWindow(hStatic_DiskFreeSize, SW_SHOW);
+                    break;
+
+                case IDM_SETTINGS_AUTO_MAINTENANCE: {
+                    ShowWindow(hStatic_AutoMaintTitle, SW_SHOW);
+                    ShowWindow(hRadio_Daily, SW_SHOW);
+                    ShowWindow(hRadio_Weekly, SW_SHOW);
+                    ShowWindow(hRadio_OnStart, SW_SHOW);
+                    ShowWindow(hCheck_Temp, SW_SHOW);
+                    ShowWindow(hCheck_Browser, SW_SHOW);
+                    ShowWindow(hCheck_Recycle, SW_SHOW);
+                    ShowWindow(hButton_SaveSettings, SW_SHOW);
+
+                    AutoMaintenanceSettings s;
+                    LoadAutoMaintenanceSettings(s);
+                    if (s.scheduleType == SCHEDULE_ON_STARTUP) {
+                        CheckDlgButton(hwnd, IDC_AUTO_MAINT_ONSTART, BST_CHECKED);
+                        CheckDlgButton(hwnd, IDC_AUTO_MAINT_DAILY, BST_UNCHECKED);
+                        CheckDlgButton(hwnd, IDC_AUTO_MAINT_WEEKLY, BST_UNCHECKED);
+                    }
+                    else {
+                        if (s.intervalMinutes == 7 * 24 * 60) CheckDlgButton(hwnd, IDC_AUTO_MAINT_WEEKLY, BST_CHECKED);
+                        else CheckDlgButton(hwnd, IDC_AUTO_MAINT_DAILY, BST_CHECKED);
+                        CheckDlgButton(hwnd, IDC_AUTO_MAINT_ONSTART, BST_UNCHECKED);
+                    }
+                    CheckDlgButton(hwnd, IDC_AUTO_MAINT_CHECK_TEMP, s.cleanTempFiles ? BST_CHECKED : BST_UNCHECKED);
+                    CheckDlgButton(hwnd, IDC_AUTO_MAINT_CHECK_BROWSER, s.cleanBrowserCache ? BST_CHECKED : BST_UNCHECKED);
+                    CheckDlgButton(hwnd, IDC_AUTO_MAINT_CHECK_RECYCLE, s.cleanRecycleBin ? BST_CHECKED : BST_UNCHECKED);
+                    break;
+                }
+                }
+                UpdateMenuText(hwnd, wmId);
+                           // Далі обробляємо самі команди
+                switch (wmId) {
+                case IDM_FILE_EXIT:
+                    DestroyWindow(hwnd);
+                    break;
+
+                case IDM_MONITORING:
+                    // — показуємо вкладку "Моніторинг ресурсів" —
+                    if (hListView_ProcessMonitor) {
+                        SetTimer(hwnd, IDT_MONITOR_REFRESH, 1000, NULL);
+                        PopulateProcessList(hListView_ProcessMonitor);
+                        ShowWindow(hStatic_CPUOverall, SW_SHOW);
+                        ShowWindow(hStatic_MemoryOverall, SW_SHOW);
+                        ShowWindow(hStatic_IOReadOverall, SW_SHOW);
+                        ShowWindow(hStatic_IOWriteOverall, SW_SHOW);
+                        ShowWindow(hStatic_DiskUsageOverall, SW_SHOW);
+                        ShowWindow(hListView_ProcessMonitor, SW_SHOW);
+                        SetFocus(hListView_ProcessMonitor);
+                    }
+                    // — Оновлюємо ▶ у меню для "Моніторинг ресурсів" —
+                    UpdateMenuText(hwnd, IDM_MONITORING);
+                    break;
+
+                case IDM_DISK_CLEANUP:
+                    // — показуємо вкладку "Очищення диска" —
+                    if (hListView_DiskCleanup) {
+                        ListView_DeleteAllItems(hListView_DiskCleanup);
+                        ShowWindow(hListView_DiskCleanup, SW_SHOW);
+                    }
+                    if (hButton_AnalyzeDisk)    ShowWindow(hButton_AnalyzeDisk, SW_SHOW);
+                    if (hButton_CleanSelected)  ShowWindow(hButton_CleanSelected, SW_SHOW);
+                    if (hButton_CleanAll)       ShowWindow(hButton_CleanAll, SW_SHOW);
+                    if (hStatic_TotalJunkLabel) ShowWindow(hStatic_TotalJunkLabel, SW_SHOW);
+                    if (hStatic_TotalJunkSize)  ShowWindow(hStatic_TotalJunkSize, SW_SHOW);
+                    if (hStatic_DiskTotalLabel) ShowWindow(hStatic_DiskTotalLabel, SW_SHOW);
+                    if (hStatic_DiskTotalSize)  ShowWindow(hStatic_DiskTotalSize, SW_SHOW);
+                    if (hStatic_DiskUsedLabel)  ShowWindow(hStatic_DiskUsedLabel, SW_SHOW);
+                    if (hStatic_DiskUsedSize)   ShowWindow(hStatic_DiskUsedSize, SW_SHOW);
+                    if (hStatic_DiskFreeLabel)  ShowWindow(hStatic_DiskFreeLabel, SW_SHOW);
+                    if (hStatic_DiskFreeSize)   ShowWindow(hStatic_DiskFreeSize, SW_SHOW);
+
+                    // — Оновлюємо ▶ у меню для "Очищення диска" —
+                    UpdateMenuText(hwnd, IDM_DISK_CLEANUP);
+                    break;
+
+
+                case IDM_SETTINGS_AUTO_MAINTENANCE:
+                    // — Автоматичне обслуговування —
+                    if (hListView_ProcessMonitor) {
+
+                        ShowWindow(hStatic_AutoMaintTitle, SW_SHOW);
+                        ShowWindow(hRadio_Daily, SW_SHOW);
+                        ShowWindow(hRadio_Weekly, SW_SHOW);
+                        ShowWindow(hRadio_OnStart, SW_SHOW);
+                        ShowWindow(hCheck_Temp, SW_SHOW);
+                        ShowWindow(hCheck_Browser, SW_SHOW);
+                        ShowWindow(hCheck_Recycle, SW_SHOW);
+                        ShowWindow(hButton_SaveSettings, SW_SHOW);
+                    }
+                    UpdateMenuText(hwnd, IDM_SETTINGS_AUTO_MAINTENANCE);
+                    break;
+
+                    // ===============================================
+                    // Обробка кнопки "Аналізувати Диск"
+                    // ===============================================
+                case IDC_DISKCLEANUP_ANALYZE_BUTTON:
+                    if (hListView_DiskCleanup) AnalyzeDisk(hwnd, hListView_DiskCleanup);
+                    return 0;
+                case IDC_DISKCLEANUP_CLEAN_BUTTON:
+                    if (hListView_DiskCleanup) CleanSelectedCategories(hwnd, hListView_DiskCleanup);
+                    return 0;
+                case IDC_DISKCLEANUP_CLEAN_ALL:
+                    if (hListView_DiskCleanup) CleanAllCategories(hwnd, hListView_DiskCleanup);
+                    return 0;
+                case IDC_AUTO_MAINT_SAVE: {
+                    AutoMaintenanceSettings s;
+                    if (IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_ONSTART)) {
+                        s.scheduleType = SCHEDULE_ON_STARTUP;
+                    }
+                    else {
+                        s.scheduleType = SCHEDULE_INTERVAL;
+                        s.intervalMinutes = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_WEEKLY) ? (7 * 24 * 60) : (24 * 60);
+                    }
+                    s.cleanTempFiles = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_CHECK_TEMP);
+                    s.cleanBrowserCache = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_CHECK_BROWSER);
+                    s.cleanRecycleBin = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_CHECK_RECYCLE);
+
+                    SaveAutoMaintenanceSettings(s);
+                    SetupAutoMaintenance(hwnd);
+                    MessageBox(hwnd, L"Налаштування автоматичного обслуговування збережено.", L"Успіх", MB_OK | MB_ICONINFORMATION);
+                    return 0;
+                }
+                default:
+                    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+                }
+
+            } break;
+
+        case WM_TIMER:
+            if (wParam == IDT_MONITOR_REFRESH) {
+                if (hListView_ProcessMonitor && IsWindowVisible(hListView_ProcessMonitor)) {
+                    PopulateProcessList(hListView_ProcessMonitor);
+                }
             }
-            // — Оновлюємо ▶ у меню для "Моніторинг ресурсів" —
-            UpdateMenuText(hwnd, IDM_MONITORING);
-            break;
-
-        case IDM_DISK_CLEANUP:
-            // — показуємо вкладку "Очищення диска" —
-            if (hListView_DiskCleanup) {
-                ListView_DeleteAllItems(hListView_DiskCleanup);
-                ShowWindow(hListView_DiskCleanup, SW_SHOW);
+            else if (wParam == IDT_AUTO_MAINTENANCE) {
+                PerformAutoMaintenance();
             }
-            if (hButton_AnalyzeDisk)    ShowWindow(hButton_AnalyzeDisk, SW_SHOW);
-            if (hButton_CleanSelected)  ShowWindow(hButton_CleanSelected, SW_SHOW);
-            if (hButton_CleanAll)       ShowWindow(hButton_CleanAll, SW_SHOW);
-            if (hStatic_TotalJunkLabel) ShowWindow(hStatic_TotalJunkLabel, SW_SHOW);
-            if (hStatic_TotalJunkSize)  ShowWindow(hStatic_TotalJunkSize, SW_SHOW);
-            if (hStatic_DiskTotalLabel) ShowWindow(hStatic_DiskTotalLabel, SW_SHOW);
-            if (hStatic_DiskTotalSize)  ShowWindow(hStatic_DiskTotalSize, SW_SHOW);
-            if (hStatic_DiskUsedLabel)  ShowWindow(hStatic_DiskUsedLabel, SW_SHOW);
-            if (hStatic_DiskUsedSize)   ShowWindow(hStatic_DiskUsedSize, SW_SHOW);
-            if (hStatic_DiskFreeLabel)  ShowWindow(hStatic_DiskFreeLabel, SW_SHOW);
-            if (hStatic_DiskFreeSize)   ShowWindow(hStatic_DiskFreeSize, SW_SHOW);
-
-            // — Оновлюємо ▶ у меню для "Очищення диска" —
-            UpdateMenuText(hwnd, IDM_DISK_CLEANUP);
             break;
+        case WM_SIZE: {
+            RECT rcClient;
+            GetClientRect(hwnd, &rcClient);
+            int clientWidth = rcClient.right - rcClient.left;
+            int clientHeight = rcClient.bottom - rcClient.top;
 
+            // --- Моніторинг процесів — ListView ---
+            if (hListView_ProcessMonitor && IsWindowVisible(hListView_ProcessMonitor)) {
+                int yOffset = 0;
+                SetWindowPos(hListView_ProcessMonitor, NULL,
+                    0, yOffset,
+                    clientWidth,
+                    clientHeight - yOffset,
+                    SWP_NOZORDER);
 
-        case IDM_SETTINGS_AUTO_MAINTENANCE:
-            // — Автоматичне обслуговування —
-            if (hListView_ProcessMonitor) {
+                // Фіксовані ширини для стовпців 1–4
+                const int widthCol1 = 100;   // “Екземпляри”
+                const int widthCol2 = 100;   // “ЦП (%)”
+                const int widthCol3 = 100;   // “Пам’ять (МБ)”
+                const int widthCol4 = 125;   // “Диск (Гб/с)”
+                int totalFixedWidth = widthCol1 + widthCol2 + widthCol3 + widthCol4;
 
-                ShowWindow(hStatic_AutoMaintTitle, SW_SHOW);
-                ShowWindow(hRadio_Daily, SW_SHOW);
-                ShowWindow(hRadio_Weekly, SW_SHOW);
-                ShowWindow(hRadio_OnStart, SW_SHOW);
-                ShowWindow(hCheck_Temp, SW_SHOW);
-                ShowWindow(hCheck_Browser, SW_SHOW);
-                ShowWindow(hCheck_Recycle, SW_SHOW);
-                ShowWindow(hButton_SaveSettings, SW_SHOW);
+                // Ширина останнього стовпця (index 0), щоб заповнити залишок
+                int scrollBarWidth = GetSystemMetrics(SM_CXVSCROLL);
+                int widthCol0 = clientWidth - totalFixedWidth - scrollBarWidth;
+                if (widthCol0 < 190) widthCol0 = 190; // мінімальна ширина, щоб не “захлиналoся”
+
+                ListView_SetColumnWidth(hListView_ProcessMonitor, 0, widthCol0);
+                ListView_SetColumnWidth(hListView_ProcessMonitor, 1, widthCol1);
+                ListView_SetColumnWidth(hListView_ProcessMonitor, 2, widthCol2);
+                ListView_SetColumnWidth(hListView_ProcessMonitor, 3, widthCol3);
+                ListView_SetColumnWidth(hListView_ProcessMonitor, 4, widthCol4);
+
             }
-            UpdateMenuText(hwnd, IDM_SETTINGS_AUTO_MAINTENANCE);
-            break;
 
-            // ===============================================
-            // Обробка кнопки "Аналізувати Диск"
-            // ===============================================
-        case IDC_DISKCLEANUP_ANALYZE_BUTTON: {
-            if (hListView_DiskCleanup) {
-                AnalyzeDisk(hwnd, hListView_DiskCleanup);
+            // --- Очищення диска ---
+            if (hListView_DiskCleanup && IsWindowVisible(hListView_DiskCleanup)) {
+
+                int controlXOffset = 10;
+                int controlYOffset = 10;
+                int clientW = clientWidth;
+                int listViewH = 300;
+
+                // ListView
+                SetWindowPos(hListView_DiskCleanup, NULL,
+                    controlXOffset, controlYOffset,
+                    clientW - 2 * controlXOffset, listViewH,
+                    SWP_NOZORDER);
+                ListView_SetColumnWidth(hListView_DiskCleanup, 0, (clientW - 2 * controlXOffset) - 150 - GetSystemMetrics(SM_CXVSCROLL));
+                ListView_SetColumnWidth(hListView_DiskCleanup, 1, 167);
+
+                // Кнопки та статичні елементи
+                int buttonHeight = 30;
+                int buttonWidth = 150;
+                int buttonY = controlYOffset + listViewH + 10;
+
+                SetWindowPos(hButton_AnalyzeDisk, NULL,
+                    controlXOffset, buttonY,
+                    buttonWidth, buttonHeight,
+                    SWP_NOZORDER);
+                SetWindowPos(hButton_CleanSelected, NULL,
+                    controlXOffset + buttonWidth + 10, buttonY,
+                    buttonWidth, buttonHeight,
+                    SWP_NOZORDER);
+                SetWindowPos(hButton_CleanAll, NULL,
+                    controlXOffset + 2 * (buttonWidth + 10), buttonY,
+                    buttonWidth, buttonHeight,
+                    SWP_NOZORDER);
+
+                int labelY = buttonY + buttonHeight + 10;
+                int labelTotalNameW = 150;
+                SetWindowPos(hStatic_TotalJunkLabel, NULL,
+                    controlXOffset, labelY,
+                    labelTotalNameW, 20,
+                    SWP_NOZORDER);
+                SetWindowPos(hStatic_TotalJunkSize, NULL,
+                    controlXOffset + labelTotalNameW + 5, labelY,
+                    (clientW - 2 * controlXOffset) - (labelTotalNameW + 5), 20,
+                    SWP_NOZORDER);
+
+                // Далі статичні "Загалом (C:)", "Зайнято (C:)", "Вільно (C:)"
+                int offsetY2 = labelY + 25;
+                SetWindowPos(hStatic_DiskFreeLabel, NULL,
+                    controlXOffset, offsetY2,
+                    labelTotalNameW, 20,
+                    SWP_NOZORDER);
+                SetWindowPos(hStatic_DiskFreeSize, NULL,
+                    controlXOffset + labelTotalNameW + 5, offsetY2,
+                    (clientW - 2 * controlXOffset) - (labelTotalNameW + 5), 20,
+                    SWP_NOZORDER);
+                offsetY2 += 25;
+                SetWindowPos(hStatic_DiskUsedLabel, NULL,
+                    controlXOffset, offsetY2,
+                    labelTotalNameW, 20,
+                    SWP_NOZORDER);
+                SetWindowPos(hStatic_DiskUsedSize, NULL,
+                    controlXOffset + labelTotalNameW + 5, offsetY2,
+                    (clientW - 2 * controlXOffset) - (labelTotalNameW + 5), 20,
+                    SWP_NOZORDER);
+                offsetY2 += 25;
+                SetWindowPos(hStatic_DiskTotalLabel, NULL,
+                    controlXOffset, offsetY2,
+                    labelTotalNameW, 20,
+                    SWP_NOZORDER);
+                SetWindowPos(hStatic_DiskTotalSize, NULL,
+                    controlXOffset + labelTotalNameW + 5, offsetY2,
+                    (clientW - 2 * controlXOffset) - (labelTotalNameW + 5), 20,
+                    SWP_NOZORDER);
+
             }
         } break;
 
-        case IDC_DISKCLEANUP_CLEAN_BUTTON: {
-            if (hListView_DiskCleanup) {
-                CleanSelectedCategories(hwnd, hListView_DiskCleanup);
-            }
+        case WM_PAINT: {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hwnd, &ps);
+            FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+            EndPaint(hwnd, &ps);
         } break;
 
-        case IDC_DISKCLEANUP_CLEAN_ALL: {
-            if (hListView_DiskCleanup) {
-                CleanAllCategories(hwnd, hListView_DiskCleanup);
-            }
-        } break;
-        case IDC_AUTO_MAINT_SAVE: {
-            // тут можна зчитати стани:
-            BOOL daily = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_DAILY);
-            BOOL weekly = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_WEEKLY);
-            BOOL onstart = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_ONSTART);
-            BOOL tmp = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_CHECK_TEMP);
-            BOOL brw = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_CHECK_BROWSER);
-            BOOL rec = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_CHECK_RECYCLE);
-            // TODO: зберегти у файл/реєстр/налаштування
-               // зберегти та запустити/перезапустити таймер
-            AutoMaintenanceSettings s;
-            s.scheduleType = IsDlgButtonChecked(hwnd, IDC_AUTO_MAINT_ONSTART)
-                ? SCHEDULE_ON_STARTUP
-                : SCHEDULE_INTERVAL;
-            if (s.scheduleType == SCHEDULE_INTERVAL) {
-                BOOL ok;
-                int val = GetDlgItemInt(hwnd, IDC_AUTO_MAINT_EDIT_INTERVAL, &ok, FALSE);
-                s.intervalMinutes = ok && val > 0 ? val : 60;
-            }
-            SaveAutoMaintenanceSettings(s);
-            SetupAutoMaintenance(hwnd);
-            MessageBox(hwnd, L"Налаштування збережено.", L"Автоматичне обслуговування", MB_OK | MB_ICONINFORMATION);
-        } break;
-        case IDM_SETTINGS_AUTOMAINT:
-            // викликаємо наше вікно налаштувань
-            ShowAutoMaintSettingsWindow(hMainWnd);
+        case WM_DESTROY:
+            KillTimer(hwnd, IDT_MONITOR_REFRESH);
+            KillTimer(hwnd, IDT_AUTO_MAINTENANCE);
+            PostQuitMessage(0);
             break;
 
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
         }
-    } break;
-
-    case WM_TIMER:
-        if (wParam == IDT_MONITOR_REFRESH) {
-            if (hListView_ProcessMonitor && IsWindowVisible(hListView_ProcessMonitor)) {
-                PopulateProcessList(hListView_ProcessMonitor);
-            }
-        }
-        else if (wParam == IDT_AUTO_MAINTENANCE) {
-            PerformAutoMaintenance();
-        }
-        break;
-
-    case WM_SIZE: {
-        RECT rcClient;
-        GetClientRect(hwnd, &rcClient);
-        int clientWidth = rcClient.right - rcClient.left;
-        int clientHeight = rcClient.bottom - rcClient.top;
-
-        // --- Моніторинг процесів — ListView ---
-        if (hListView_ProcessMonitor && IsWindowVisible(hListView_ProcessMonitor)) {
-            int yOffset = 0;
-            SetWindowPos(hListView_ProcessMonitor, NULL,
-                0, yOffset,
-                clientWidth,
-                clientHeight - yOffset,
-                SWP_NOZORDER);
-
-            // Фіксовані ширини для стовпців 1–4
-            const int widthCol1 = 100;   // “Екземпляри”
-            const int widthCol2 = 100;   // “ЦП (%)”
-            const int widthCol3 = 100;   // “Пам’ять (МБ)”
-            const int widthCol4 = 125;   // “Диск (Гб/с)”
-            int totalFixedWidth = widthCol1 + widthCol2 + widthCol3 + widthCol4;
-
-            // Ширина останнього стовпця (index 0), щоб заповнити залишок
-            int scrollBarWidth = GetSystemMetrics(SM_CXVSCROLL);
-            int widthCol0 = clientWidth - totalFixedWidth - scrollBarWidth;
-            if (widthCol0 < 190) widthCol0 = 190; // мінімальна ширина, щоб не “захлиналoся”
-
-            ListView_SetColumnWidth(hListView_ProcessMonitor, 0, widthCol0);
-            ListView_SetColumnWidth(hListView_ProcessMonitor, 1, widthCol1);
-            ListView_SetColumnWidth(hListView_ProcessMonitor, 2, widthCol2);
-            ListView_SetColumnWidth(hListView_ProcessMonitor, 3, widthCol3);
-            ListView_SetColumnWidth(hListView_ProcessMonitor, 4, widthCol4);
-
-        }
-
-        // --- Очищення диска ---
-        if (hListView_DiskCleanup && IsWindowVisible(hListView_DiskCleanup)) {
-
-            int controlXOffset = 10;
-            int controlYOffset = 10;
-            int clientW = clientWidth;
-            int listViewH = 300;
-
-            // ListView
-            SetWindowPos(hListView_DiskCleanup, NULL,
-                controlXOffset, controlYOffset,
-                clientW - 2 * controlXOffset, listViewH,
-                SWP_NOZORDER);
-            ListView_SetColumnWidth(hListView_DiskCleanup, 0, (clientW - 2 * controlXOffset) - 150 - GetSystemMetrics(SM_CXVSCROLL));
-            ListView_SetColumnWidth(hListView_DiskCleanup, 1, 167);
-
-            // Кнопки та статичні елементи
-            int buttonHeight = 30;
-            int buttonWidth = 150;
-            int buttonY = controlYOffset + listViewH + 10;
-
-            SetWindowPos(hButton_AnalyzeDisk, NULL,
-                controlXOffset, buttonY,
-                buttonWidth, buttonHeight,
-                SWP_NOZORDER);
-            SetWindowPos(hButton_CleanSelected, NULL,
-                controlXOffset + buttonWidth + 10, buttonY,
-                buttonWidth, buttonHeight,
-                SWP_NOZORDER);
-            SetWindowPos(hButton_CleanAll, NULL,
-                controlXOffset + 2 * (buttonWidth + 10), buttonY,
-                buttonWidth, buttonHeight,
-                SWP_NOZORDER);
-
-            int labelY = buttonY + buttonHeight + 10;
-            int labelTotalNameW = 150;
-            SetWindowPos(hStatic_TotalJunkLabel, NULL,
-                controlXOffset, labelY,
-                labelTotalNameW, 20,
-                SWP_NOZORDER);
-            SetWindowPos(hStatic_TotalJunkSize, NULL,
-                controlXOffset + labelTotalNameW + 5, labelY,
-                (clientW - 2 * controlXOffset) - (labelTotalNameW + 5), 20,
-                SWP_NOZORDER);
-
-            // Далі статичні "Загалом (C:)", "Зайнято (C:)", "Вільно (C:)"
-            int offsetY2 = labelY + 25;
-            SetWindowPos(hStatic_DiskFreeLabel, NULL,
-                controlXOffset, offsetY2,
-                labelTotalNameW, 20,
-                SWP_NOZORDER);
-            SetWindowPos(hStatic_DiskFreeSize, NULL,
-                controlXOffset + labelTotalNameW + 5, offsetY2,
-                (clientW - 2 * controlXOffset) - (labelTotalNameW + 5), 20,
-                SWP_NOZORDER);
-            offsetY2 += 25;
-            SetWindowPos(hStatic_DiskUsedLabel, NULL,
-                controlXOffset, offsetY2,
-                labelTotalNameW, 20,
-                SWP_NOZORDER);
-            SetWindowPos(hStatic_DiskUsedSize, NULL,
-                controlXOffset + labelTotalNameW + 5, offsetY2,
-                (clientW - 2 * controlXOffset) - (labelTotalNameW + 5), 20,
-                SWP_NOZORDER);
-            offsetY2 += 25;
-            SetWindowPos(hStatic_DiskTotalLabel, NULL,
-                controlXOffset, offsetY2,
-                labelTotalNameW, 20,
-                SWP_NOZORDER);
-            SetWindowPos(hStatic_DiskTotalSize, NULL,
-                controlXOffset + labelTotalNameW + 5, offsetY2,
-                (clientW - 2 * controlXOffset) - (labelTotalNameW + 5), 20,
-                SWP_NOZORDER);
-
-        }
-    } break;
-
-    case WM_PAINT: {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hwnd, &ps);
-        FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-        EndPaint(hwnd, &ps);
-    } break;
-
-    case WM_DESTROY:
-        KillTimer(hwnd, IDT_MONITOR_REFRESH);
-        PostQuitMessage(0);
-        break;
-
-    default:
-        return DefWindowProc(hwnd, uMsg, wParam, lParam);
+        return 0;
     }
-    return 0;
-}

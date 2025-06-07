@@ -1,11 +1,18 @@
-//AutoMaintenance.cpp
+// AutoMaintenance.cpp (виправлена версія)
+
 #include "AutoMaintenance.h"
-#include <CommCtrl.h>
+#include "Utils.h"
 #include "ResourceDefinitions.h"
+#include <CommCtrl.h>
 #include <windows.h>
 #include <chrono>
+#include <string>  // <-- Додано для std::wstring та std::to_wstring
+#include <vector>  // <-- Додано для std::vector
 
 static const wchar_t* REG_PATH = L"Software\\Optimiz\\AutoMaintenance";
+
+// Попереднє оголошення, якщо визначення функції нижче
+void ClearAllBrowserCaches();
 
 // Вікно налаштувань — статичні змінні для зручності
 struct {
@@ -22,7 +29,7 @@ void CreateAutoMaintenanceControls(HWND hWndParent) {
 
     // Заголовок
     CreateWindowExW(0, L"STATIC", L"Налаштування автоматичного обслуговування",
-        WS_CHILD,
+        WS_CHILD | WS_VISIBLE,
         x, y, w, 20,
         hWndParent, (HMENU)IDC_AUTO_MAINT_TITLE,
         GetModuleHandle(NULL), NULL);
@@ -30,213 +37,211 @@ void CreateAutoMaintenanceControls(HWND hWndParent) {
 
     // Періодичність (радіокнопки)
     CreateWindowExW(0, L"BUTTON", L"Щодня",
-        WS_CHILD | BS_AUTORADIOBUTTON,
+        WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP,
         x, y, 100, 20,
         hWndParent, (HMENU)IDC_AUTO_MAINT_DAILY,
         GetModuleHandle(NULL), NULL);
     CreateWindowExW(0, L"BUTTON", L"Щотижня",
-        WS_CHILD | BS_AUTORADIOBUTTON,
+        WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
         x + 110, y, 100, 20,
         hWndParent, (HMENU)IDC_AUTO_MAINT_WEEKLY,
         GetModuleHandle(NULL), NULL);
     CreateWindowExW(0, L"BUTTON", L"При старті програми",
-        WS_CHILD | BS_AUTORADIOBUTTON,
+        WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
         x + 220, y, 150, 20,
         hWndParent, (HMENU)IDC_AUTO_MAINT_ONSTART,
         GetModuleHandle(NULL), NULL);
-    y += 30; // 30
+    y += 40;
 
     // Категорії очищення (чекбокси)
     CreateWindowExW(0, L"BUTTON", L"Тимчасові файли",
-        WS_CHILD | BS_AUTOCHECKBOX,
+        WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
         x, y, 150, 20,
         hWndParent, (HMENU)IDC_AUTO_MAINT_CHECK_TEMP,
         GetModuleHandle(NULL), NULL);
     CreateWindowExW(0, L"BUTTON", L"Кеш браузерів",
-        WS_CHILD | BS_AUTOCHECKBOX,
+        WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
         x + 160, y, 150, 20,
         hWndParent, (HMENU)IDC_AUTO_MAINT_CHECK_BROWSER,
         GetModuleHandle(NULL), NULL);
     CreateWindowExW(0, L"BUTTON", L"Кошик",
-        WS_CHILD | BS_AUTOCHECKBOX,
+        WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
         x + 320, y, 100, 20,
         hWndParent, (HMENU)IDC_AUTO_MAINT_CHECK_RECYCLE,
         GetModuleHandle(NULL), NULL);
-    y += 30; // 30
+    y += 40;
 
     // Кнопка збереження
     CreateWindowExW(0, L"BUTTON", L"Зберегти",
-        WS_CHILD | BS_DEFPUSHBUTTON,
+        WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
         x, y, 100, 25,
         hWndParent, (HMENU)IDC_AUTO_MAINT_SAVE,
         GetModuleHandle(NULL), NULL);
 }
 
+
 bool LoadAutoMaintenanceSettings(AutoMaintenanceSettings& s) {
     HKEY hKey;
     DWORD type, data, size = sizeof(data);
-    if (RegCreateKeyExW(HKEY_CURRENT_USER, REG_PATH, 0, NULL, 0, KEY_READ, NULL, &hKey, NULL) != ERROR_SUCCESS)
-        return false;
-    // ScheduleType
-    if (RegQueryValueExW(hKey, L"ScheduleType", NULL, &type, (LPBYTE)&data, &size) == ERROR_SUCCESS)
-        s.scheduleType = (ScheduleType)data;
-    else
+    if (RegOpenKeyExW(HKEY_CURRENT_USER, REG_PATH, 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
+        // Якщо ключ не існує, встановлюємо значення за замовчуванням
         s.scheduleType = SCHEDULE_ON_STARTUP;
-    // Interval
+        s.intervalMinutes = 60;
+        s.cleanTempFiles = true;
+        s.cleanBrowserCache = true;
+        s.cleanRecycleBin = false;
+        return false;
+    }
+
+    if (RegQueryValueExW(hKey, L"ScheduleType", NULL, &type, (LPBYTE)&data, &size) == ERROR_SUCCESS) s.scheduleType = (ScheduleType)data;
+    else s.scheduleType = SCHEDULE_ON_STARTUP;
+
     size = sizeof(data);
-    if (RegQueryValueExW(hKey, L"IntervalMinutes", NULL, &type, (LPBYTE)&data, &size) == ERROR_SUCCESS)
-        s.intervalMinutes = (int)data;
-    else
-        s.intervalMinutes = 60;  // за замовчанням щогодини
+    if (RegQueryValueExW(hKey, L"IntervalMinutes", NULL, &type, (LPBYTE)&data, &size) == ERROR_SUCCESS) s.intervalMinutes = (int)data;
+    else s.intervalMinutes = 60;
+
+    size = sizeof(data);
+    if (RegQueryValueExW(hKey, L"CleanTempFiles", NULL, &type, (LPBYTE)&data, &size) == ERROR_SUCCESS) s.cleanTempFiles = (bool)data;
+    else s.cleanTempFiles = true;
+
+    size = sizeof(data);
+    if (RegQueryValueExW(hKey, L"CleanBrowserCache", NULL, &type, (LPBYTE)&data, &size) == ERROR_SUCCESS) s.cleanBrowserCache = (bool)data;
+    else s.cleanBrowserCache = true;
+
+    size = sizeof(data);
+    if (RegQueryValueExW(hKey, L"CleanRecycleBin", NULL, &type, (LPBYTE)&data, &size) == ERROR_SUCCESS) s.cleanRecycleBin = (bool)data;
+    else s.cleanRecycleBin = false;
+
     RegCloseKey(hKey);
     return true;
 }
 
 bool SaveAutoMaintenanceSettings(const AutoMaintenanceSettings& s) {
     HKEY hKey;
-    if (RegCreateKeyExW(HKEY_CURRENT_USER, REG_PATH, 0, NULL, 0, KEY_WRITE, NULL, &hKey, NULL) != ERROR_SUCCESS)
-        return false;
-    DWORD data = (DWORD)s.scheduleType;
+    if (RegCreateKeyExW(HKEY_CURRENT_USER, REG_PATH, 0, NULL, 0, KEY_WRITE, NULL, &hKey, NULL) != ERROR_SUCCESS) return false;
+
+    DWORD data;
+    data = (DWORD)s.scheduleType;
     RegSetValueExW(hKey, L"ScheduleType", 0, REG_DWORD, (BYTE*)&data, sizeof(data));
     data = (DWORD)s.intervalMinutes;
     RegSetValueExW(hKey, L"IntervalMinutes", 0, REG_DWORD, (BYTE*)&data, sizeof(data));
+    data = (DWORD)s.cleanTempFiles;
+    RegSetValueExW(hKey, L"CleanTempFiles", 0, REG_DWORD, (BYTE*)&data, sizeof(data));
+    data = (DWORD)s.cleanBrowserCache;
+    RegSetValueExW(hKey, L"CleanBrowserCache", 0, REG_DWORD, (BYTE*)&data, sizeof(data));
+    data = (DWORD)s.cleanRecycleBin;
+    RegSetValueExW(hKey, L"CleanRecycleBin", 0, REG_DWORD, (BYTE*)&data, sizeof(data));
+
     RegCloseKey(hKey);
     return true;
 }
 
 void SetupAutoMaintenance(HWND hWnd) {
-    // Прибираємо старий таймер
     KillTimer(hWnd, IDT_AUTO_MAINTENANCE);
-
     AutoMaintenanceSettings s;
-    if (!LoadAutoMaintenanceSettings(s))
-        return;
-
-    // Якщо запускати одразу при старті
+    if (!LoadAutoMaintenanceSettings(s)) {
+        SaveAutoMaintenanceSettings(s);
+    }
     if (s.scheduleType == SCHEDULE_ON_STARTUP) {
         PerformAutoMaintenance();
     }
-    // Якщо з інтервалом
     else if (s.scheduleType == SCHEDULE_INTERVAL && s.intervalMinutes > 0) {
-        UINT ms = (UINT)std::chrono::minutes(s.intervalMinutes).count();
+        UINT ms = (UINT)s.intervalMinutes * 60 * 1000;
         SetTimer(hWnd, IDT_AUTO_MAINTENANCE, ms, NULL);
     }
 }
 
-
-// Процедура вікна налаштувань
-LRESULT CALLBACK AutoMaintSettingsWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    switch (msg) {
-    case WM_CREATE: {
-        // Завантажити поточні налаштування
-        LoadAutoMaintenanceSettings(g_am_ctx.settings);
-        // Створити контролі
-        CreateWindowExW(0, L"BUTTON", L"Запуск при старті",
-            WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
-            10, 10, 150, 20, hWnd, (HMENU)IDC_AM_RADIO_STARTUP, NULL, NULL);
-
-        CreateWindowExW(0, L"BUTTON", L"Інтервал (хвилин):",
-            WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
-            10, 40, 150, 20, hWnd, (HMENU)IDC_AM_RADIO_INTERVAL, NULL, NULL);
-
-        CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", NULL,
-            WS_CHILD | WS_VISIBLE | ES_NUMBER,
-            170, 40, 50, 20, hWnd, (HMENU)IDC_AM_EDIT_INTERVAL, NULL, NULL);
-
-        CreateWindowExW(0, L"BUTTON", L"OK",
-            WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
-            50, 80, 60, 25, hWnd, (HMENU)IDC_AM_BUTTON_OK, NULL, NULL);
-
-        CreateWindowExW(0, L"BUTTON", L"Відмінити",
-            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-            130, 80, 80, 25, hWnd, (HMENU)IDC_AM_BUTTON_CANCEL, NULL, NULL);
-
-        // Встановити стан кнопок/полів за поточними налаштуваннями
-        if (g_am_ctx.settings.scheduleType == SCHEDULE_ON_STARTUP) {
-            SendMessageW(GetDlgItem(hWnd, IDC_AM_RADIO_STARTUP), BM_SETCHECK, BST_CHECKED, 0);
-            EnableWindow(GetDlgItem(hWnd, IDC_AM_EDIT_INTERVAL), FALSE);
-        }
-        else {
-            SendMessageW(GetDlgItem(hWnd, IDC_AM_RADIO_INTERVAL), BM_SETCHECK, BST_CHECKED, 0);
-            EnableWindow(GetDlgItem(hWnd, IDC_AM_EDIT_INTERVAL), TRUE);
-        }
-        SetWindowTextW(GetDlgItem(hWnd, IDC_AM_EDIT_INTERVAL), std::to_wstring(g_am_ctx.settings.intervalMinutes).c_str());
-        return 0;
+// Допоміжна функція для очищення кешу всіх браузерів (визначення ПЕРЕД викликом)
+void ClearAllBrowserCaches() {
+    std::wstring localAppData = ExpandEnvironmentStringsForPath(L"%LOCALAPPDATA%");
+    if (localAppData.empty()) {
+        WriteLog(L"AutoMaintenance: Не вдалося отримати шлях %LOCALAPPDATA%");
+        return;
     }
 
-    case WM_COMMAND: {
-        switch (LOWORD(wParam)) {
-        case IDC_AM_RADIO_STARTUP:
-            g_am_ctx.settings.scheduleType = SCHEDULE_ON_STARTUP;
-            EnableWindow(GetDlgItem(hWnd, IDC_AM_EDIT_INTERVAL), FALSE);
-            break;
-        case IDC_AM_RADIO_INTERVAL:
-            g_am_ctx.settings.scheduleType = SCHEDULE_INTERVAL;
-            EnableWindow(GetDlgItem(hWnd, IDC_AM_EDIT_INTERVAL), TRUE);
-            break;
-        case IDC_AM_BUTTON_OK: {
-            if (g_am_ctx.settings.scheduleType == SCHEDULE_INTERVAL) {
-                BOOL ok;
-                int val = GetDlgItemInt(hWnd, IDC_AM_EDIT_INTERVAL, &ok, FALSE);
-                if (ok && val > 0) g_am_ctx.settings.intervalMinutes = val;
-            }
-            SaveAutoMaintenanceSettings(g_am_ctx.settings);
-            // Переналаштувати таймер
-            SetupAutoMaintenance(g_am_ctx.hParent);
-            DestroyWindow(hWnd);
-            break;
-        }
-        case IDC_AM_BUTTON_CANCEL:
-            DestroyWindow(hWnd);
-            break;
-        }
-        return 0;
+    // Edge
+    std::vector<std::wstring> edgePaths = {
+        localAppData + L"\\Microsoft\\Edge\\User Data\\Default\\Cache",
+        localAppData + L"\\Microsoft\\Edge\\User Data\\Default\\Code Cache",
+        localAppData + L"\\Microsoft\\Edge\\User Data\\Default\\GPUCache"
+    };
+    for (const auto& path : edgePaths) {
+        DeleteDirectoryContents(path);
     }
+    WriteLog(L"AutoMaintenance: Очищено кеш Microsoft Edge.");
 
-    case WM_DESTROY:
-        UnregisterClassW(AUTO_MAINT_SETTINGS_CLASS, GetModuleHandle(NULL));
-        return 0;
+    // Chrome
+    std::vector<std::wstring> chromePaths = {
+        localAppData + L"\\Google\\Chrome\\User Data\\Default\\Cache",
+        localAppData + L"\\Google\\Chrome\\User Data\\Default\\Code Cache",
+        localAppData + L"\\Google\\Chrome\\User Data\\Default\\GPUCache"
+    };
+    for (const auto& path : chromePaths) {
+        DeleteDirectoryContents(path);
     }
+    WriteLog(L"AutoMaintenance: Очищено кеш Google Chrome.");
 
-    return DefWindowProcW(hWnd, msg, wParam, lParam);
+    // Firefox
+    std::wstring appData = ExpandEnvironmentStringsForPath(L"%APPDATA%");
+    std::vector<std::wstring> ffProfileBasePaths;
+    if (!appData.empty()) ffProfileBasePaths.push_back(appData + L"\\Mozilla\\Firefox\\Profiles");
+    if (!localAppData.empty()) ffProfileBasePaths.push_back(localAppData + L"\\Mozilla\\Firefox\\Profiles");
+    for (const auto& basePath : ffProfileBasePaths) {
+        WIN32_FIND_DATA fd;
+        HANDLE hFind = FindFirstFile((basePath + L"\\*").c_str(), &fd);
+        if (hFind != INVALID_HANDLE_VALUE) {
+            do {
+                if ((fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
+                    (wcsstr(fd.cFileName, L".default") || wcsstr(fd.cFileName, L"-release"))) {
+                    std::wstring profilePath = basePath + L"\\" + fd.cFileName;
+                    DeleteDirectoryContents(profilePath + L"\\cache2");
+                    DeleteDirectoryContents(profilePath + L"\\startupCache");
+                }
+            } while (FindNextFile(hFind, &fd) != 0);
+            FindClose(hFind);
+        }
+    }
+    WriteLog(L"AutoMaintenance: Очищено кеш Mozilla Firefox.");
 }
 
-// Функція, що створює та показує вікно налаштувань
-void ShowAutoMaintSettingsWindow(HWND hParent) {
-    g_am_ctx.hParent = hParent;
-
-    HINSTANCE hInst = GetModuleHandle(NULL);
-    WNDCLASSW wc = { };
-    wc.lpfnWndProc = AutoMaintSettingsWndProc;
-    wc.hInstance = hInst;
-    wc.lpszClassName = AUTO_MAINT_SETTINGS_CLASS;
-    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    RegisterClassW(&wc);
-
-    // Розміри вікна
-    int width = 280, height = 150;
-    RECT rc = { 0, 0, width, height };
-    AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-
-    CreateWindowExW(
-        0,
-        AUTO_MAINT_SETTINGS_CLASS,
-        L"Налаштування автообслуговування",
-        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_VISIBLE,
-        CW_USEDEFAULT, CW_USEDEFAULT,
-        rc.right - rc.left, rc.bottom - rc.top,
-        hParent,
-        NULL,
-        hInst,
-        NULL
-    );
-}
 
 void PerformAutoMaintenance() {
-    // Приклад виклику: видалити все сміття за замовчанням
-    // RunDiskCleanup();      // <-- розкоментуйте та поправте на свою функцію
-    // Якщо у вас є окремі API:
-    // ClearWindowsTemp();
-    // ClearUserTemp();
-    // ClearBrowserCache();
+    WriteLog(L"Запуск автоматичного обслуговування...");
+    AutoMaintenanceSettings s;
+    LoadAutoMaintenanceSettings(s);
+    int cleanedCount = 0;
+    std::wstring reportMessage = L"Автоматичне обслуговування завершено.\n\n";
+    if (s.cleanTempFiles) {
+        wchar_t pathBuffer[MAX_PATH];
+        if (GetWindowsDirectory(pathBuffer, MAX_PATH)) {
+            std::wstring winTemp = std::wstring(pathBuffer) + L"\\Temp";
+            DeleteDirectoryContents(winTemp);
+            WriteLog(L"AutoMaintenance: Очищено системні тимчасові файли.");
+        }
+        if (GetTempPath(MAX_PATH, pathBuffer)) {
+            std::wstring userTemp = pathBuffer;
+            if (!userTemp.empty() && (userTemp.back() == L'\\' || userTemp.back() == L'/')) {
+                userTemp.pop_back();
+            }
+            DeleteDirectoryContents(userTemp);
+            WriteLog(L"AutoMaintenance: Очищено користувацькі тимчасові файли.");
+        }
+        reportMessage += L"• Тимчасові файли очищено.\n";
+        cleanedCount++;
+    }
+    if (s.cleanBrowserCache) {
+        ClearAllBrowserCaches();
+        reportMessage += L"• Кеш браузерів очищено.\n";
+        cleanedCount++;
+    }
+    if (s.cleanRecycleBin) {
+        EmptyRecycleBin();
+        WriteLog(L"AutoMaintenance: Очищено Кошик.");
+        reportMessage += L"• Кошик очищено.\n";
+        cleanedCount++;
+    }
+    WriteLog(L"Автоматичне обслуговування завершено.");
+    if (cleanedCount > 0) {
+        MessageBox(NULL, reportMessage.c_str(), L"Автоматичне обслуговування", MB_OK | MB_ICONINFORMATION);
+    }
 }

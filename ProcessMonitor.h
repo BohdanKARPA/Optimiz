@@ -7,14 +7,15 @@
 #include <vector>
 #include <string>
 
-struct AggregatedProcessInfo {
-    std::wstring displayName;         // ім'я процесу
-    int           instanceCount;      // кількість екземплярів
-    ULONGLONG     totalWorkingSetSize; // сумарна ОЗП (байти)
-    double        totalCpuPercent;    // **сума CPU (%) усіх екземплярів процесу**
-    ULONGLONG     totalIoRead;        // сумарно прочитано (байти) для усіх екземплярів
-    ULONGLONG     totalIoWrite;       // сумарно записано (байти) для усіх екземплярів
-    double        lastIoGBps;       // швидкість I/O (Мбіт/с) для процесу (сума усіх екземплярів)
+struct AggregatedProcessInfo {  
+    std::wstring displayName = L"";         // ім'я процесу  
+    int           instanceCount = 0;       // кількість екземплярів  
+    ULONGLONG     totalWorkingSetSize = 0; // сумарна ОЗП (байти)  
+    double        totalCpuPercent = 0.0;   // **сума CPU (%) усіх екземплярів процесу**  
+    ULONGLONG     totalIoRead = 0;         // сумарно прочитано (байти) для усіх екземплярів  
+    ULONGLONG     totalIoWrite = 0;        // сумарно записано (байти) для усіх екземплярів  
+    double        lastIoGBps = 0.0;        // швидкість I/O (Мбіт/с) для процесу (сума усіх екземплярів)  
+
 };
 
 // Глобальні змінні (перенесені сюди з Main.cpp)
