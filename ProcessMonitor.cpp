@@ -101,7 +101,7 @@ bool CompareByColumn(const AggregatedProcessInfo& a, const AggregatedProcessInfo
         return g_ProcessSortAsc
             ? (a.totalWorkingSetSize > b.totalWorkingSetSize)
             : (a.totalWorkingSetSize < b.totalWorkingSetSize);
-   
+
     case 4: // Диск (Мб/с)
         return g_ProcessSortAsc
             ? (a.lastIoGBps > b.lastIoGBps)
@@ -332,7 +332,7 @@ void PopulateProcessList(HWND hListView) {
     // 6) Обчислюємо загальні підсумки:
     double grandTotalCpuPct = 0.0;
     double grandTotalMemPct = 0.0;
-    double grandTotalDiskMbps = 0.0;   
+    double grandTotalDiskMbps = 0.0;
 
     for (const auto& proc : g_AggregatedProcessList) {
         grandTotalCpuPct += proc.totalCpuPercent;

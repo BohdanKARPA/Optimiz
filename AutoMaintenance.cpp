@@ -1,3 +1,4 @@
+//AutoMaintenance.cpp
 #include "AutoMaintenance.h"
 #include <CommCtrl.h>
 #include "ResourceDefinitions.h"
@@ -34,7 +35,7 @@ void CreateAutoMaintenanceControls(HWND hWndParent) {
         hWndParent, (HMENU)IDC_AUTO_MAINT_DAILY,
         GetModuleHandle(NULL), NULL);
     CreateWindowExW(0, L"BUTTON", L"Щотижня",
-        WS_CHILD| BS_AUTORADIOBUTTON,
+        WS_CHILD | BS_AUTORADIOBUTTON,
         x + 110, y, 100, 20,
         hWndParent, (HMENU)IDC_AUTO_MAINT_WEEKLY,
         GetModuleHandle(NULL), NULL);
@@ -47,17 +48,17 @@ void CreateAutoMaintenanceControls(HWND hWndParent) {
 
     // Категорії очищення (чекбокси)
     CreateWindowExW(0, L"BUTTON", L"Тимчасові файли",
-        WS_CHILD| BS_AUTOCHECKBOX,
+        WS_CHILD | BS_AUTOCHECKBOX,
         x, y, 150, 20,
         hWndParent, (HMENU)IDC_AUTO_MAINT_CHECK_TEMP,
         GetModuleHandle(NULL), NULL);
     CreateWindowExW(0, L"BUTTON", L"Кеш браузерів",
-        WS_CHILD| BS_AUTOCHECKBOX,
+        WS_CHILD | BS_AUTOCHECKBOX,
         x + 160, y, 150, 20,
         hWndParent, (HMENU)IDC_AUTO_MAINT_CHECK_BROWSER,
         GetModuleHandle(NULL), NULL);
     CreateWindowExW(0, L"BUTTON", L"Кошик",
-        WS_CHILD| BS_AUTOCHECKBOX,
+        WS_CHILD | BS_AUTOCHECKBOX,
         x + 320, y, 100, 20,
         hWndParent, (HMENU)IDC_AUTO_MAINT_CHECK_RECYCLE,
         GetModuleHandle(NULL), NULL);
@@ -65,7 +66,7 @@ void CreateAutoMaintenanceControls(HWND hWndParent) {
 
     // Кнопка збереження
     CreateWindowExW(0, L"BUTTON", L"Зберегти",
-        WS_CHILD| BS_DEFPUSHBUTTON,
+        WS_CHILD | BS_DEFPUSHBUTTON,
         x, y, 100, 25,
         hWndParent, (HMENU)IDC_AUTO_MAINT_SAVE,
         GetModuleHandle(NULL), NULL);

@@ -146,7 +146,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     HMENU hMenuFile = CreateMenu();
 
     AppendMenu(hMenuFile, MF_STRING, IDM_FILE_EXIT, L"&Вихід");
-    AppendMenu(hMenubar , MF_POPUP , (UINT_PTR)hMenuFile, L"&Файл");
+    AppendMenu(hMenubar, MF_POPUP, (UINT_PTR)hMenuFile, L"&Файл");
 
     AppendMenu(hMenubar, MF_STRING, IDM_MONITORING, MENU_TEXT_MONITOR);
     AppendMenu(hMenubar, MF_STRING, IDM_DISK_CLEANUP, MENU_TEXT_DISK);
@@ -260,7 +260,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         hCheck_Recycle = GetDlgItem(hwnd, IDC_AUTO_MAINT_CHECK_RECYCLE);
         hButton_SaveSettings = GetDlgItem(hwnd, IDC_AUTO_MAINT_SAVE);
 
-       break;
+        break;
 
         // ============================
        // Оновлено: Додаємо обробку двойного кліку по автозавантаженню
@@ -283,7 +283,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             PopulateProcessList(hListView_ProcessMonitor);
         }
 
-       
+
 
     } break;
 
@@ -293,7 +293,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         // Спершу ховаємо всі вкладки, щоби не було накладання
         switch (wmId) {
         case IDM_MONITORING:
-        case IDM_DISK_CLEANUP:       
+        case IDM_DISK_CLEANUP:
         case IDM_SETTINGS_AUTO_MAINTENANCE:
             // — Моніторинг —
             if (hListView_ProcessMonitor)    ShowWindow(hListView_ProcessMonitor, SW_HIDE);
@@ -376,19 +376,19 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             UpdateMenuText(hwnd, IDM_DISK_CLEANUP);
             break;
 
-       
+
         case IDM_SETTINGS_AUTO_MAINTENANCE:
             // — Автоматичне обслуговування —
-            if (hListView_ProcessMonitor){
-       
-            ShowWindow(hStatic_AutoMaintTitle, SW_SHOW);
-            ShowWindow(hRadio_Daily, SW_SHOW);
-            ShowWindow(hRadio_Weekly, SW_SHOW);
-            ShowWindow(hRadio_OnStart, SW_SHOW);
-            ShowWindow(hCheck_Temp, SW_SHOW);
-            ShowWindow(hCheck_Browser, SW_SHOW);
-            ShowWindow(hCheck_Recycle, SW_SHOW);
-            ShowWindow(hButton_SaveSettings, SW_SHOW);
+            if (hListView_ProcessMonitor) {
+
+                ShowWindow(hStatic_AutoMaintTitle, SW_SHOW);
+                ShowWindow(hRadio_Daily, SW_SHOW);
+                ShowWindow(hRadio_Weekly, SW_SHOW);
+                ShowWindow(hRadio_OnStart, SW_SHOW);
+                ShowWindow(hCheck_Temp, SW_SHOW);
+                ShowWindow(hCheck_Browser, SW_SHOW);
+                ShowWindow(hCheck_Recycle, SW_SHOW);
+                ShowWindow(hButton_SaveSettings, SW_SHOW);
             }
             UpdateMenuText(hwnd, IDM_SETTINGS_AUTO_MAINTENANCE);
             break;
@@ -565,8 +565,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 controlXOffset + labelTotalNameW + 5, offsetY2,
                 (clientW - 2 * controlXOffset) - (labelTotalNameW + 5), 20,
                 SWP_NOZORDER);
-            
-        }            
+
+        }
     } break;
 
     case WM_PAINT: {

@@ -491,7 +491,7 @@ void AnalyzeDisk(HWND hwnd, HWND hListView) {
 // ============================
 void CleanSelectedCategories(HWND hwnd, HWND hListView) {
     int selectedCount = ListView_GetSelectedCount(hListView);
-     if (g_JunkCategories.empty()) {
+    if (g_JunkCategories.empty()) {
         MessageBox(hwnd,
             L"Спочатку натисніть 'Аналізувати Диск', щоб знайти, що можна очистити.",
             L"Увага",

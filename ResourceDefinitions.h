@@ -1,5 +1,3 @@
-//ResourceDefinitions.h
-
 #ifndef RESOURCE_DEFINITIONS_H
 #define RESOURCE_DEFINITIONS_H
 
@@ -9,7 +7,7 @@
 #define IDM_DISK_CLEANUP                   202
 
 #define IDM_SETTINGS_AUTO_MAINTENANCE      301
- 
+
 #define IDM_HELP                           401
 
 // Ідентифікатори контролів:
@@ -47,3 +45,4 @@
 #
 
 #endif // RESOURCE_DEFINITIONS_H
+

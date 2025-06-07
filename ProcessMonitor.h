@@ -32,3 +32,4 @@ void PopulateProcessList(HWND hListView);
 bool CompareByColumn(const AggregatedProcessInfo& a, const AggregatedProcessInfo& b);
 
 #endif // PROCESS_MONITOR_H
+

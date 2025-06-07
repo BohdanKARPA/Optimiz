@@ -211,3 +211,6 @@ void RequestAdminRights(const wchar_t* exePath) {
         PostQuitMessage(0);
     }
 }
+
+
+
