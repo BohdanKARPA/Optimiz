@@ -4,7 +4,7 @@
 #define AUTOMAINTENANCE_H
 
 #include <windows.h>
-#define IDT_AUTO_MAINTENANCE 1001
+#define IDT_AUTO_MAINTENANCE   1001
 
 // ID-шки контролів
 #define IDC_AM_RADIO_STARTUP   2001

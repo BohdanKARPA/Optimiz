@@ -1,4 +1,4 @@
-// AutoMaintenance.cpp (виправлена версія)
+// AutoMaintenance.cpp 
 
 #include "AutoMaintenance.h"
 #include "Utils.h"
@@ -8,6 +8,7 @@
 #include <chrono>
 #include <string>  // <-- Додано для std::wstring та std::to_wstring
 #include <vector>  // <-- Додано для std::vector
+#include <time.h> 
 
 static const wchar_t* REG_PATH = L"Software\\Optimiz\\AutoMaintenance";
 
@@ -77,8 +78,17 @@ void CreateAutoMaintenanceControls(HWND hWndParent) {
         x, y, 100, 25,
         hWndParent, (HMENU)IDC_AUTO_MAINT_SAVE,
         GetModuleHandle(NULL), NULL);
-}
 
+
+    y += 35;  // відступ під кнопкою "Зберегти"
+    CreateWindowExW(
+        0, L"STATIC", L"Наступний запуск: —",
+        WS_CHILD | WS_VISIBLE,
+        x, y, 300, 20,
+        hWndParent, (HMENU)IDC_AUTO_MAINT_NEXT,
+        GetModuleHandle(NULL), NULL
+    );
+}
 
 bool LoadAutoMaintenanceSettings(AutoMaintenanceSettings& s) {
     HKEY hKey;
@@ -149,6 +159,27 @@ void SetupAutoMaintenance(HWND hWnd) {
         UINT ms = (UINT)s.intervalMinutes * 60 * 1000;
         SetTimer(hWnd, IDT_AUTO_MAINTENANCE, ms, NULL);
     }
+    {
+        HWND hNext = GetDlgItem(hWnd, IDC_AUTO_MAINT_NEXT);
+        if (hNext) {
+            if (s.scheduleType == SCHEDULE_ON_STARTUP) {
+                SetWindowTextW(hNext, L"Наступний запуск: при старті програми");
+            }
+            else {
+                time_t now = time(NULL);
+                time_t next = now + (time_t)s.intervalMinutes * 60;
+                struct tm tmNext;
+                localtime_s(&tmNext, &next);
+                wchar_t buf[64];
+                swprintf(buf, _countof(buf),
+                    L"Наступний запуск: %02d.%02d.%04d %02d:%02d",
+                    tmNext.tm_mday, tmNext.tm_mon + 1, tmNext.tm_year + 1900,
+                    tmNext.tm_hour, tmNext.tm_min);
+                SetWindowTextW(hNext, buf);
+            }
+        }
+    }
+
 }
 
 // Допоміжна функція для очищення кешу всіх браузерів (визначення ПЕРЕД викликом)
@@ -203,7 +234,6 @@ void ClearAllBrowserCaches() {
     }
     WriteLog(L"AutoMaintenance: Очищено кеш Mozilla Firefox.");
 }
-
 
 void PerformAutoMaintenance() {
     WriteLog(L"Запуск автоматичного обслуговування...");

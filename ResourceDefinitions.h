@@ -1,3 +1,4 @@
+//ResourceDefinitions.h
 #ifndef RESOURCE_DEFINITIONS_H
 #define RESOURCE_DEFINITIONS_H
 
@@ -9,6 +10,8 @@
 #define IDM_SETTINGS_AUTO_MAINTENANCE      301
 
 #define IDM_HELP                           401
+// наприклад, у ResourceDefinitions.h
+#define AUTO_MAINT_TAB_INDEX 2   // тут 0,1,2Е Ц номер вашоњ вкладки Ђјвтообслуговуванн€ї
 
 // ≤дентиф≥катори контрол≥в:
 #define IDC_PROCESSLISTVIEW               1001
@@ -36,8 +39,9 @@
 #define IDC_AUTO_MAINT_CHECK_RECYCLE 3007
 #define IDC_AUTO_MAINT_SAVE         3008
 #define IDC_AUTO_MAINT_EDIT_INTERVAL 3009
-
 #define IDM_SETTINGS_AUTOMAINT            3010
+#define IDC_AUTO_MAINT_NEXT          3011
+
 // ≤дентиф≥катор таймера дл€ оновленн€ мон≥торингу
 #define IDT_MONITOR_REFRESH               5001
 #define IDT_AUTOMAINT_TIMER               5002

@@ -222,6 +222,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     static HWND hRadio_Daily, hRadio_Weekly, hRadio_OnStart = NULL;
     static HWND hCheck_Temp, hCheck_Browser, hCheck_Recycle = NULL;
     static HWND hButton_SaveSettings = NULL;
+    static HWND hButton_Settings = NULL;
 
     switch (uMsg) {
     case WM_CREATE:
@@ -259,6 +260,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         hCheck_Browser = GetDlgItem(hwnd, IDC_AUTO_MAINT_CHECK_BROWSER);
         hCheck_Recycle = GetDlgItem(hwnd, IDC_AUTO_MAINT_CHECK_RECYCLE);
         hButton_SaveSettings = GetDlgItem(hwnd, IDC_AUTO_MAINT_SAVE);
+        hButton_Settings = GetDlgItem(hwnd, IDC_AUTO_MAINT_NEXT);
 
         break;
 
@@ -309,6 +311,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             ShowWindow(hCheck_Browser, SW_HIDE);
             ShowWindow(hCheck_Recycle, SW_HIDE);
             ShowWindow(hButton_SaveSettings, SW_HIDE);
+            ShowWindow(hButton_Settings, SW_HIDE);
+
             KillTimer(hwnd, IDT_MONITOR_REFRESH);
         }
 
@@ -346,6 +350,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                     ShowWindow(hCheck_Browser, SW_SHOW);
                     ShowWindow(hCheck_Recycle, SW_SHOW);
                     ShowWindow(hButton_SaveSettings, SW_SHOW);
+                    ShowWindow(hButton_Settings, SW_SHOW);
 
                     AutoMaintenanceSettings s;
                     LoadAutoMaintenanceSettings(s);
@@ -424,6 +429,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                         ShowWindow(hCheck_Browser, SW_SHOW);
                         ShowWindow(hCheck_Recycle, SW_SHOW);
                         ShowWindow(hButton_SaveSettings, SW_SHOW);
+                        ShowWindow(hButton_Settings, SW_SHOW);
                     }
                     UpdateMenuText(hwnd, IDM_SETTINGS_AUTO_MAINTENANCE);
                     break;
